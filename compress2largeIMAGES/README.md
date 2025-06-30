@@ -412,53 +412,180 @@ Check out the ASCII flow diagram below to help illustrate this pipeline from sca
 <summary>Visual Script Breakdown</summary>
 
 ```
-               +------------------------------+
-               |   Start: Main Script Runs    |
-               +------------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Check PROCESS_DIR exists     |
-            +-------------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Load or init temp log file   |
-            +-------------------------------+
-                            |
-                            v
-            +-----------------------------------------+
-            |  Scan for *.jpg / *.jpeg files          |
-            |  Skip originals/, skip small files,     |
-            |  skip already logged (processed) files  |
-            +-----------------------------------------+
-                            |
-                            v
-            +-----------------------------------+
-            |  For each file to optimize:       |
-            +-----------------------------------+
-                            |
-                            v
-    +------------------------------------------------+
-    | 1. Save original mtime                         |
-    | 2. Copy file → .tempbackup                     |
-    | 3. Use djpeg | cjpeg → recompress to .tmp      |
-    | 4. Use exiftool to restore metadata            |
-    | 5. Move original → /originals/ (with suffix)   |
-    | 6. Replace original with optimized .tmp        |
-    | 7. Restore mtime                                |
-    | 8. Log to .jpg_files_optimized--keepme.log      |
-    +------------------------------------------------+
-                            |
-                            v
-               +----------------------------+
-               |  Repeat for next file      |
-               +----------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Show summary + Done message  |
-            +-------------------------------+
+IN-PLACE JPG OPTIMIZER - EXECUTION FLOW
+═══════════════════════════════════════════════════════════════════════════════════════════════
+
+START
+  │
+  ├─ PROCESS LOCKING & INITIALIZATION
+  │   ├─ Create lockfile (/tmp/.jpg_optimizer.lock)
+  │   ├─ Check for existing instance ──[RUNNING]──► EXIT "Already running"
+  │   │                                    │
+  │   │                                   [OK]
+  │   │                                    ▼
+  │   ├─ Set trap for cleanup (INT/TERM/EXIT signals)
+  │   └─ Initialize environment variables:
+  │       ├─ PROCESS_DIR=/workdir
+  │       ├─ JPEG_QUALITY=85
+  │       ├─ SIZE_THRESHOLD=5250KB (5,376,000 bytes)
+  │       ├─ ORIGINALS_DIR=/workdir/originals
+  │       └─ TEMP_LOG_FILE=.jpg_files_optimized--keepme.log
+  │
+  ├─ VALIDATION & SETUP
+  │   ├─ Check if PROCESS_DIR exists ──[NO]──► EXIT ERROR
+  │   │                                  │
+  │   │                                 [YES]
+  │   │                                  ▼
+  │   ├─ init_logs() - Create/touch temp log file
+  │   └─ Load existing processing history
+  │
+  ├─ FILE DISCOVERY & ANALYSIS
+  │   ├─ Scan for JPG/JPEG files (case-insensitive)
+  │   ├─ Skip files in /originals/ directory
+  │   ├─ For each file found:
+  │   │   ├─ Check file_above_threshold() (>5250KB)
+  │   │   ├─ Check is_file_processed() (hash+size match in log)
+  │   │   └─ Categorize file for processing
+  │   │
+  │   └─ Display file count summary:
+  │       ├─ Total JPG files found: X
+  │       ├─ Files below 5250KB (untouched): Y
+  │       ├─ Files already processed: Z
+  │       └─ Files to optimize: W
+  │
+  ├─ PRE-PROCESSING VALIDATION
+  │   ├─ Check if files_to_optimize > 0 ──[NO]──► EXIT "No files to optimize"
+  │   │                                     │
+  │   │                                    [YES]
+  │   │                                     ▼
+  │   └─ Display processing warnings and backup info
+  │
+  ├─ MAIN PROCESSING LOOP
+  │   │
+  │   └─ For each file to optimize:
+  │       │
+  │       ├─ Display progress: [N/Total] (X%)
+  │       │
+  │       ├─ optimize_jpg_file() PROCESS:
+  │       │   │
+  │       │   ├─ Capture original mtime: get_file_mtime()
+  │       │   ├─ Create temp backup: file.jpg.tempbackup
+  │       │   ├─ Record original_size for statistics
+  │       │   │
+  │       │   ├─ RECOMPRESSION PIPELINE:
+  │       │   │   ├─ djpeg tempbackup | cjpeg -quality 85 -optimize -progressive
+  │       │   │   └─ Output to: file.jpg.tmp
+  │       │   │
+  │       │   ├─ METADATA PRESERVATION:
+  │       │   │   ├─ exiftool -TagsFromFile tempbackup -all:all file.jpg.tmp
+  │       │   │   └─ Check success ──[FAIL]──► Cleanup & Return Error
+  │       │   │                        │
+  │       │   │                       [OK]
+  │       │   │                        ▼
+  │       │   ├─ BACKUP & REPLACEMENT:
+  │       │   │   ├─ backup_original() - Move original to /originals/
+  │       │   │   │   ├─ Create backup directory structure
+  │       │   │   │   ├─ Generate unique backup filename:
+  │       │   │   │   │   ├─ With SUFFIX: basename_SUFFIX.jpg
+  │       │   │   │   │   └─ With timestamp: basename_timestamp.jpg
+  │       │   │   │   └─ Handle filename conflicts with counter
+  │       │   │   │
+  │       │   │   ├─ mv file.jpg.tmp → file.jpg (replace original)
+  │       │   │   └─ set_file_mtime() - Restore original timestamp
+  │       │   │
+  │       │   ├─ LOGGING & STATISTICS:
+  │       │   │   ├─ Calculate compression savings (KB & percentage)
+  │       │   │   ├─ Generate file hash: get_file_hash()
+  │       │   │   ├─ add_to_temp_log() with pipe-delimited format:
+  │       │   │   │   └─ filepath|hash|size|date|original_size|compressed_size
+  │       │   │   └─ Display: "✓ Optimized: file.jpg (XKB → YKB, saved Z%)"
+  │       │   │
+  │       │   └─ Cleanup temp files & return success
+  │       │
+  │       └─ Update progress counter
+  │
+  ├─ FINAL STATISTICS & CLEANUP
+  │   ├─ Display processing summary:
+  │   │   ├─ Files optimized: X
+  │   │   ├─ Files failed: Y
+  │   │   └─ Total in log: Z
+  │   │
+  │   └─ cleanup() function (via trap):
+  │       ├─ Remove lockfile
+  │       └─ Release file lock
+  │
+  └─ END
+
+PROCESSING DECISION TREE
+════════════════════════
+For each JPG file found:
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                 │
+│  File: example.jpg                                                              │
+│  │                                                                              │
+│  ├─ In /originals/ directory? ──[YES]──► SKIP (avoid processing backups)       │
+│  │                                │                                             │
+│  │                               [NO]                                           │
+│  │                                ▼                                             │
+│  ├─ Size > 5250KB? ──[NO]──► SKIP (below threshold)                            │
+│  │                    │                                                         │
+│  │                   [YES]                                                      │
+│  │                    ▼                                                         │
+│  ├─ Already processed? ──[YES]──► SKIP (hash+size match in log)                │
+│  │   (hash + size check)  │                                                     │
+│  │                       [NO]                                                   │
+│  │                        ▼                                                     │
+│  └─ ADD TO OPTIMIZATION QUEUE                                                   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+TEMP LOG FILE STRUCTURE
+═══════════════════════
+File: .jpg_files_optimized--keepme.log
+Format: filepath|hash|size|date|original_size|compressed_size
+
+Example entries:
+/workdir/photo1.jpg|a1b2c3d4e5f6|2048000|2024-01-15 14:30:25|3145728|2048000
+/workdir/subdir/photo2.jpg|f6e5d4c3b2a1|1536000|2024-01-15 14:31:12|2621440|1536000
+
+BACKUP DIRECTORY STRUCTURE
+═══════════════════════════
+Original: /workdir/subdir/photo.jpg
+Backup:   /workdir/originals/subdir/photo_1642251825.jpg
+                                    └─ timestamp or suffix
+
+TOOLS & UTILITIES USED
+═══════════════════════
+┌─ Image Processing ─┐    ┌─ Metadata Handling ─┐    ┌─ File Operations ─┐
+│ • djpeg (decode)    │    │ • exiftool (copy)    │    │ • find (discover)  │
+│ • cjpeg (encode)    │    │ • date (timestamps)  │    │ • stat (file info) │
+│ • Quality: 85       │    │ • touch (set mtime)  │    │ • mv/cp (move/copy)│
+│ • -optimize flag    │    │ • md5sum/md5 (hash)  │    │ • flock (locking)  │
+│ • -progressive flag │    │                      │    │ • trap (cleanup)   │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+
+HELPER FUNCTIONS USED:
+═════════════════════
+• get_file_hash() - MD5 hash or size_mtime fallback
+• get_file_size_bytes() - Cross-platform file size
+• is_file_processed() - Check against temp log
+• file_above_threshold() - Size comparison
+• get_file_mtime() / set_file_mtime() - Timestamp handling
+• backup_original() - Move to originals directory
+• add_to_temp_log() - Pipe-delimited logging
+
+
+SAFETY FEATURES
+═══════════════
+├─ Process Locking: Prevents multiple instances
+├─ Original Backup: All originals moved to /originals/ before modification
+├─ Metadata Preservation: Full EXIF data copied to optimized files
+├─ Timestamp Preservation: Original modification times restored
+├─ Processing History: Permanent log prevents duplicate processing
+├─ Error Handling: Failed operations don't affect originals
+├─ Unique Filenames: Backup naming prevents overwrites
+└─ Signal Trapping: Clean exit on interruption
+
 ```
 
 </details>
