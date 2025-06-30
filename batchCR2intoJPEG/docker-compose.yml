@@ -1,0 +1,23 @@
+---
+services:
+  cr2jpeg:
+    build: .
+    container_name: cr2jpeg
+    volumes:
+      - ./input:/input   # Mount the input folder (replace with your local folder)
+      - ./output:/output # Mount the output folder (replace with your local folder)
+    environment:
+########## You May Want To Change These ##########
+      # JPEG Quality (85-90 is typical for Google Pixel/GCam, balancing quality & file size)
+      - JPEG_QUALITY=85             # JPEG output quality (1-100)
+      - JPEG_OPT_FLAGS="-optimize -progressive"  # JPEG optimization flags
+      - SIZE_THRESHOLD=5376000      # <--- Set this to the minimum size you'd like to compress (in bytes)
+################# END POSSIBLE CHANGES #################
+##########################################################
+######### You Really Do Not Need To Change These ##########
+      - SRC_ROOT=/input             # Input folder path (does not need to be changed)
+      - DST_ROOT=/output            # Output folder path (does not need to be changed)
+      - LOG_FILE=/output/processed_files.log  # Path to log file
+      - PROGRESS_FILE=/output/.progress_counter  # Path to progress counter
+###############################################################
+    restart: unless-stopped
