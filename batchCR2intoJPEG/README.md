@@ -69,6 +69,11 @@ If you haven’t copied this Github repo yet, you'll need a `Dockerfile` that in
 
 Here is a `Bash` script to download all the required files for the CR2 --> JPEG script ran in Docker.
 
+<details>
+
+<summary>Bash/ZSH Script</summary>  
+
+
 ```bash
 #!/bin/bash
 
@@ -103,12 +108,18 @@ done
 echo "All files processed."
 ```
 
+</details>
+
 
 * * *
 
 ### Powershell Script to Download All the Files
 
 Here is a `Powershell` script to download all the required files for the CR2 --> JPEG script ran in Docker.
+
+<details>
+
+<summary>Powershell Script</summary>  
 
 
 ```powershell
@@ -142,6 +153,8 @@ foreach ($file in $files) {
 
 Write-Host "All files processed."
 ```
+
+</details>
 
 
 * * *
@@ -199,3 +212,130 @@ If you modify the script, you will need to load the script back into the image, 
 
 `docker-compose up --build --force-recreate`
 
+
+* * *
+
+### ASCII Flow of the CR2intoJPEG script
+
+
+<details>
+
+<summary>Visual Script Breakdown</summary>
+
+
+CR2JPEG BATCH PROCESSOR - EXECUTION FLOW
+═══════════════════════════════════════════════════════════════════════════════════════════════
+
+START
+  │
+  ├─ Initialize Environment
+  │   ├─ Set src_root (/input) & dst_root (/output)
+  │   ├─ Create log files (processed_files.log, .progress_counter)
+  │   └─ Set JPEG_QUALITY=85, SIZE_THRESHOLD=5250KB
+  │
+  ├─ Validate Input Directory
+  │   └─ Check if src_root exists ──[NO]──► EXIT ERROR
+  │                                   │
+  │                                  [YES]
+  │                                   ▼
+  ├─ File Discovery & Counting
+  │   ├─ Scan for CR2 files ──► count_cr2_files()
+  │   ├─ Scan for JPG files ──► count_jpg_files()
+  │   ├─ Scan for MP4 files ──► count_mp4_files()
+  │   └─ Check processed_files.log for already processed files
+  │
+  ├─ Display Summary
+  │   ├─ Show file counts by type
+  │   ├─ Show already processed count
+  │   └─ Show processing strategy
+  │
+  ├─ PROCESSING PHASE
+  │   │
+  │   ├─ CR2 FILES PROCESSING ──[if total_cr2 > 0]
+  │   │   │
+  │   │   └─ For each CR2 file:
+  │   │       ├─ Check if already_processed() ──[YES]──► Skip
+  │   │       │                                   │
+  │   │       │                                  [NO]
+  │   │       │                                   ▼
+  │   │       ├─ Create output directory structure
+  │   │       ├─ dcraw -c -w file.cr2 | cjpeg → output.jpg
+  │   │       ├─ exiftool: Copy ALL metadata CR2→JPG
+  │   │       ├─ set_file_timestamp() using EXIF DateTimeOriginal
+  │   │       ├─ add_to_log() & update_progress()
+  │   │       └─ Display: "✓ Converted: file.cr2 → file.jpg"
+  │   │
+  │   ├─ JPG FILES PROCESSING ──[if total_jpg > 0]
+  │   │   │
+  │   │   └─ For each JPG file:
+  │   │       ├─ Check if already_processed() ──[YES]──► Update timestamp only
+  │   │       │                                   │
+  │   │       │                                  [NO]
+  │   │       │                                   ▼
+  │   │       ├─ Check file_above_threshold() (5250KB)
+  │   │       │   │
+  │   │       │   ├─[LARGE FILE >5250KB]──► COMPRESSION PATH
+  │   │       │   │   ├─ djpeg | cjpeg → temp file
+  │   │       │   │   ├─ exiftool: Copy metadata
+  │   │       │   │   ├─ set_file_timestamp()
+  │   │       │   │   ├─ Calculate & show compression savings
+  │   │       │   │   └─ Display: "✓ Compressed: XKB → YKB (saved Z%)"
+  │   │       │   │
+  │   │       │   └─[SMALL FILE ≤5250KB]──► COPY ONLY PATH
+  │   │       │       ├─ cp -p (preserve timestamps)
+  │   │       │       ├─ set_file_timestamp() using EXIF
+  │   │       │       └─ Display: "✓ Copied with timestamp update"
+  │   │       │
+  │   │       └─ add_to_log() & update_progress()
+  │   │
+  │   └─ MP4 FILES PROCESSING ──[if total_mp4 > 0]
+  │       │
+  │       └─ For each MP4 file:
+  │           ├─ Check if already_processed() ──[YES]──► Skip
+  │           │                                   │
+  │           │                                  [NO]
+  │           │                                   ▼
+  │           ├─ Create output directory structure
+  │           ├─ cp -p (copy with preserved timestamps)
+  │           ├─ set_file_timestamp() if EXIF available
+  │           ├─ add_to_log() & update_progress()
+  │           └─ Display: "✓ Copied: file.mp4 → file.mp4"
+  │
+  ├─ FINAL STATISTICS
+  │   ├─ Read counters from temp files
+  │   ├─ Display processing summary:
+  │   │   ├─ CR2 files converted: X
+  │   │   ├─ JPG files compressed & optimized: Y
+  │   │   ├─ JPG files with timestamp only: Z
+  │   │   ├─ Already processed files (timestamp updated): W
+  │   │   └─ MP4 files copied: V
+  │   └─ Clean up temporary counter files
+  │
+  └─ END
+
+PROGRESS TRACKING SYSTEM
+────────────────────────
+┌─ .progress_counter file ─┐    ┌─ processed_files.log ─┐
+│ Current: 15/42 (35%)     │    │ /input/IMG_001.CR2     │
+│ Updates after each file  │    │ /input/IMG_002.JPG     │
+└─────────────────────────┘    │ /input/VID_001.MP4     │
+                               │ ... (full file paths)  │
+                               └─────────────────────────┘
+
+TOOLS USED IN PROCESSING
+────────────────────────
+┌─ CR2 → JPG Conversion ──┐    ┌─ JPG Optimization ──┐    ┌─ Metadata & Timestamps ─┐
+│ • dcraw (RAW decoder)   │    │ • djpeg (decompress) │    │ • exiftool (copy EXIF)  │
+│ • cjpeg (JPEG encoder)  │    │ • cjpeg (recompress) │    │ • date (timestamp conv) │
+│ • Quality: 85           │    │ • -optimize          │    │ • touch (set mtime)     │
+│ • -progressive flag     │    │ • -progressive       │    │ • stat (get file size)  │
+└─────────────────────────┘    └─────────────────────┘    └─────────────────────────┘
+
+DOCKER INTEGRATION
+──────────────────
+Environment Variables:
+├─ SRC_ROOT=/input (mounted volume)
+├─ DST_ROOT=/output (mounted volume)
+└─ Container has all required tools pre-installed
+
+</details>
