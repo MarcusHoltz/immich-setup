@@ -126,6 +126,13 @@ A: Audio is copied without re-encoding to preserve quality and processing speed.
 
 ## Example Output
 
+Once you run the script, it will display all of the set variables and then begin to process files. This will look something like the Example Output below:
+
+<details>
+
+<summary>Example Output of the inplace_mp4_optimizer.sh</summary>
+
+
 ```bash
 $ ./inplace_mp4_optimizer.sh
 
@@ -197,6 +204,8 @@ Optimized files have had their mtimes set to their original modified date.
 Originals have been moved to: /workdir/originals
 Converted files logged at: /workdir/.mp4_files_optimized--keepme.log
 ```
+
+</details>
 
 
 * * *
@@ -543,54 +552,127 @@ Check out the MP4 optimization pipeline diagram below for a visual overview.
 
 * * *
 
-### ASCII Flow of the In-Place MP4 Optimizer script
+### User and Machine Flow of the In-Place MP4 Optimizer script
+
+<details>
+
+<summary>Visual Script Breakdown</summary>
+
 
 ```
-               +------------------------------+
-               |   Start: Main Script Runs    |
-               +------------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Check PROCESS_DIR exists     |
-            +-------------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Load or init temp log file   |
-            +-------------------------------+
-                            |
-                            v
-            +-----------------------------------------+
-            |  Scan for *.mp4 files (recursive)       |
-            |  Skip originals/, skip small files,     |
-            |  skip already logged (processed) files  |
-            +-----------------------------------------+
-                            |
-                            v
-            +-----------------------------------+
-            |  For each file to optimize:       |
-            +-----------------------------------+
-                            |
-                            v
-    +------------------------------------------------+
-    | 1. Save original mtime                         |
-    | 2. Copy file → .tempbackup                     |
-    | 3. Run ffmpeg → recompress → .tmp.mp4          |
-    | 4. Use exiftool to restore metadata            |
-    | 5. Move original → /originals/ (with suffix)   |
-    | 6. Replace original with optimized .tmp.mp4     |
-    | 7. Restore mtime                                |
-    | 8. Log to .mp4_files_optimized--keepme.log      |
-    +------------------------------------------------+
-                            |
-                            v
-               +----------------------------+
-               |  Repeat for next file      |
-               +----------------------------+
-                            |
-                            v
-            +-------------------------------+
-            |  Show summary + Done message  |
-            +-------------------------------+
+MP4 OPTIMIZER SCRIPT - LOGIC FLOW DIAGRAM
+=========================================
+
+USER PERSPECTIVE                    |  MACHINE LOGIC
+------------------------------------|----------------------------------
+                                    |
+User runs script                    |  Parse environment variables:
+   ./inplace_mp4_optimizer.sh       |  - PROCESS_DIR (default: /workdir)
+                                    |  - SIZE_THRESHOLD_KB (default: 5250)
+                                    |  - CRF (default: 21)
+                                    |  - PRESET (default: slow)
+                                    |  - SUFFIX (optional)
+                                    |
+User sees initialization info:      |  Validate PROCESS_DIR exists
+- Processing directory              |     └─ If not: EXIT with error
+- CRF Quality setting              |
+- Encoder preset                   |  Initialize log files:
+- Size threshold                   |  - Create .mp4_files_optimized--keepme.log
+- Backup directory location        |  - Create .mp4_files_optimized--errors.log
+                                    |
+                                    |  Load existing temp log (if exists)
+                                    |     └─ Count previously processed files
+                                    |
+User sees "Scanning for MP4s..."   |  Scan directory recursively:
+                                    |     find PROCESS_DIR -type f *.mp4/MP4
+                                    |
+User sees file count summary:       |  For each MP4 file found:
+- Total MP4 files found            |  ┌─ Skip if in /originals/ directory
+- Files below threshold            |  ├─ Check file size vs threshold
+- Files already processed          |  ├─ Calculate MD5 hash
+- Files to optimize                |  ├─ Check if already in temp log
+                                    |  └─ Categorize file status
+                                    |
+User sees warning about            |  Build optimization queue:
+in-place modification              |     └─ Only files > threshold + not processed
+                                    |
+                                    |  IF no files to optimize:
+                                    |     └─ Display "No files to optimize"
+                                    |        and EXIT
+                                    |
+User sees optimization progress:    |  FOR EACH file in optimization queue:
+[1/5] (20%)                        |
+"Optimizing: filename.mp4"         |  ┌─ Get original file mtime
+                                    |  ├─ Create temp backup copy
+                                    |  ├─ Get original file size
+                                    |  │
+                                    |  ├─ Run ffmpeg compression:
+                                    |  │   ffmpeg -i input -c:v libx264 
+                                    |  │   -crf CRF -preset PRESET output.tmp
+                                    |  │
+                                    |  ├─ IF ffmpeg succeeds:
+                                    |  │   ├─ Copy metadata with exiftool
+                                    |  │   ├─ Move original to backup location
+                                    |  │   ├─ Move compressed file to original location
+                                    |  │   ├─ Restore original mtime
+                                    |  │   ├─ Calculate new hash
+                                    |  │   ├─ Log to temp file
+                                    |  │   └─ Clean up temp backup
+                                    |  │
+                                    |  └─ IF ffmpeg fails:
+                                    |      ├─ Log error to error file
+                                    |      └─ Clean up temp files
+                                    |
+User sees success/failure messages: |
+"✓ Optimized: file.mp4             |  Calculate and display:
+(5120KB → 3840KB, saved 25%)"      |  - Original size vs new size
+"Time for file.mp4 set to..."      |  - Percentage saved
+"Logged to processing history"      |  - Confirm mtime restoration
+                                    |  - Confirm logging
+                                    |
+OR                                  |
+"✗ Error compressing: file.mp4"     |  Write error to error log file
+                                    |
+User sees final summary:            |  Count final results:
+"Processing complete!"              |  - Total files processed
+"- Optimized: X files"              |  - Total failures
+"- Failed: Y files"                 |  - Total entries in log
+"- Total in log: Z files"           |
+                                    |
+User sees completion message:       |  Display final status and locations:
+"All done! MP4 files larger than   |  - Threshold reminder
+5250KB have been optimized..."      |  - Backup directory location
+"Originals moved to: /path/originals"|  - Log file location
+"Converted files logged at: ..."    |
+
+KEY DECISION POINTS:
+===================
+
+FILE PROCESSING LOGIC:
+- Skip if in /originals/ subdirectory
+- Skip if size <= SIZE_THRESHOLD_KB (default 5250KB)
+- Skip if hash+size already in temp log (already processed)
+- Process only files meeting all criteria
+
+BACKUP STRATEGY:
+- Move original to /originals/ with suffix or timestamp
+- Ensure unique backup filename (increment counter if needed)
+- Preserve directory structure in backup location
+
+OPTIMIZATION PROCESS:
+- Use libx264 codec with configurable CRF and preset
+- Copy audio stream without reencoding (-c:a copy)
+- Preserve all metadata using exiftool
+- Maintain original file modification time
+- Log success/failure for tracking
+
+ERROR HANDLING:
+- Directory validation at startup
+- ffmpeg failure handling
+- exiftool metadata copy failure handling
+- File system operation error handling
+- Cleanup of temporary files on failure
 ```
+
+</details>
+
