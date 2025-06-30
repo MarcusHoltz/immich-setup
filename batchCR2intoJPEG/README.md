@@ -222,7 +222,7 @@ If you modify the script, you will need to load the script back into the image, 
 
 <summary>Visual Script Breakdown</summary>
 
-
+```text
 CR2JPEG BATCH PROCESSOR - EXECUTION FLOW
 ═══════════════════════════════════════════════════════════════════════════════════════════════
 
@@ -337,5 +337,6 @@ Environment Variables:
 ├─ SRC_ROOT=/input (mounted volume)
 ├─ DST_ROOT=/output (mounted volume)
 └─ Container has all required tools pre-installed
+```
 
 </details>
