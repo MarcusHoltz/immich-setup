@@ -1,0 +1,37 @@
+#!/bin/bash
+# Docker Compose Delayed Restart and Update Script for Immich
+# -----------------------------------
+# This script is used to delay an update and restart the 
+# Immich photo management stack and then NetBird using Docker.
+#
+# This file is located at: /boot/config/plugins/user.scripts/scripts/Immich-docker-compose
+#
+# Steps that are performed:
+# 1. Navigates to the Immich Docker Compose project directory.
+# 2. Waits 100 seconds before initiating the update (to allow the system to fully settle).
+# 3. Stops the current Immich containers.
+# 4. Pulls the latest images defined in the Docker Compose file.
+# 5. Starts the updated containers in detached mode.
+# 6. Waits an additional 60 seconds to allow the containers to fully initialize.
+# 7. Restarts the NetBird-Client container, to re-establish VPN connectivity.
+
+# Change to the Immich Docker Compose project directory
+cd /boot/config/plugins/compose.manager/projects/immich
+
+# Wait for 100 seconds (e.g., allowing system services to be fully ready)
+sleep 100
+
+# Stop and remove current Immich containers
+docker compose down
+
+# Pull the latest versions of the container images
+docker compose pull
+
+# Recreate and start the containers in the background
+docker compose up -d
+
+# Wait 60 seconds to allow the containers to initialize
+sleep 60
+
+# Restart the NetBird-Client container, for network service alignment
+docker container restart NetBird-Client
