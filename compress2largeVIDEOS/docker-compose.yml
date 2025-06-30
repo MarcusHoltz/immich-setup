@@ -1,0 +1,35 @@
+---
+services:
+  mp4-optimizer:
+    build: .
+    container_name: mp4-optimizer
+    user: myuser  # Run the container as 'myuser'
+#    user: "0:0"            # Run as root user inside container    
+    volumes:
+      # Mount your local directory containing JPG files
+      # Change "./videos" to your actual photo/video import directory path, DEFAULT set to current working directory
+      - .:/workdir
+    environment:
+########## You May Want To Change These ##########
+      # MP4 Quality ---
+      # CRF 18-20: Very high quality – Almost indistinguishable from the original video. File size is noticeably larger than 21.
+      # CRF 21: Default "good quality" – Best balance between quality and file size. This is the default for many tools like FFmpeg.
+      - CRF=21       # Default CRF video compression value is 21
+      - PRESET=slow  # Default preset value is "slow"      
+      # MP4 size threshold in KB (default: 5250, override as needed)
+      - SIZE_THRESHOLD_KB=5250   # <--- Set this to your desired threshold
+      # Add any text on the end of your original files, to differentiate by filename as well
+      - SUFFIX=
+
+######### You Really Do Not Need To Change These ##########
+      - PROCESS_DIR=/workdir           # Directory to process (inside container)
+    # Log file is made with pipe-delimited format: filepath|hash|size|date|original_size|compressed_size      
+    # Remove the container after it finishes
+    # Comment this out if you want to keep the container for debugging
+    # rm: true
+    # Trouble-Shooting Section: Run interactively for debugging
+    # Uncomment the lines below and comment out the default CMD to run interactively
+    # stdin_open: true
+    # tty: true
+    # command: /bin/bash
+    restart: unless-stopped
