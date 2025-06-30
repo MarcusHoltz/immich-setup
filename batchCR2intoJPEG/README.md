@@ -115,29 +115,29 @@ Here is a `Powershell` script to download all the required files for the CR2 -->
 # --- Config Section ---
 
 # Define the base URL for your GitHub repo
-BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/batchCR2intoJPEG/"
+$BASE_URL = "https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/batchCR2intoJPEG/"
 
-# Files to download
-FILE_1="cr2jpeg.sh"
-FILE_2="docker-compose.yml"
-FILE_3="Dockerfile"
+# Add files you want to download here
+$FILE_1 = "cr2jpeg.sh"
+$FILE_2 = "docker-compose.yml"
+$FILE_3 = "Dockerfile"
 
 # --- Script to download files ---
 
 # Loop through all files defined with FILE_# syntax
-$files = Get-Variable -Name FILE_* | ForEach-Object { $_.Value }
+$files = @($FILE_1, $FILE_2, $FILE_3)
 
 foreach ($file in $files) {
     $file_url = "${BASE_URL}${file}"  # Create the full URL
     Write-Host "Downloading $file from $file_url..."
 
+    # Define the path where the file will be saved
+    $destination_path = ".\$file"
+
     # Download the file using Invoke-WebRequest
-    try {
-        Invoke-WebRequest -Uri $file_url -OutFile $file -ErrorAction Stop
-        Write-Host "Downloaded: $file"
-    } catch {
-        Write-Host "Failed: $file"
-    }
+    Invoke-WebRequest -Uri $file_url -OutFile $destination_path
+
+    Write-Host "Downloaded $file to $destination_path"
 }
 
 Write-Host "All files processed."
