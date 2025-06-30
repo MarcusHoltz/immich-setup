@@ -1,0 +1,32 @@
+---
+services:
+  jpg-optimizer:
+    build: .
+    container_name: jpg-optimizer
+    user: myuser  # Run the container as 'myuser'
+#    user: "0:0"            # Run as root user inside container        
+    volumes:
+      # Mount your local directory containing JPG files
+      # Change "./photos" to your actual images/photo directory path, DEFAULT set to current working directory
+      - .:/workdir
+    environment:
+########## You May Want To Change These ##########
+########## You May Want To Change These ##########
+      # JPEG Quality (85-90 is typical for Google Pixel/GCam, balancing quality & file size)
+      - JPEG_QUALITY=85             # JPEG output quality (1-100)
+      - SIZE_THRESHOLD_KB=5250   # <--- Set this to the minimum size you'd like to compress (in KB)
+      - JPEG_OPT_FLAGS="-optimize -progressive"  # JPEG optimization flags      
+      # Add any text on the end of your original files, to differentiate by filename as well
+      - SUFFIX=
+######### You Really Do Not Need To Change These ##########
+      - PROCESS_DIR=/workdir           # Directory to process (inside container)
+    # Log file is made with pipe-delimited format: filepath|hash|size|date|original_size|compressed_size      
+    # Remove the container after it finishes
+    # Comment this out if you want to keep the container for debugging
+    # rm: true
+    # Trouble-Shooting Section: Run interactively for debugging
+    # Uncomment the lines below and comment out the default CMD to run interactively
+    # stdin_open: true
+    # tty: true
+    # command: /bin/bash
+    restart: unless-stopped
