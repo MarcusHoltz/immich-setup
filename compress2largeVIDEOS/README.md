@@ -67,7 +67,7 @@
 
 - `SUFFIX` – Optional text to append to backup filenames, to avoid confusion if using a flat filesystem.
 
-- `SIZE_THRESHOLD_KB`:  Minimum file size (in kilobytes) to consider for optimization (default 5250 KB).  Files below this size are skipped entirely.
+- `SIZE_THRESHOLD_KB`:  Minimum file size (in kilobytes) to consider for optimization (default `5250` KB).  Files below this size are skipped entirely.
 
 5. Run the container and have it remove itself when complete:
 
@@ -85,6 +85,107 @@
 
    - Progress is shown as it works
 
+
+* * *
+
+## In-Place MP4 Optimizer Downloader: Copy the Github Files
+
+If you haven’t copied this Github repo yet, you'll need a `Dockerfile` that installs tools, a `docker-compose.yml` file to define how the container should be set-up, and the `inplace_mp4_optimizer.sh` script.
+
+
+* * *
+
+### Bash/ZSH Script to Download All the Files
+
+Here is a `Bash` script to download all the required files for the In-Place MP4 Optimizer script ran in Docker.
+
+
+<details>
+
+<summary>Bash/ZSH Script</summary>  
+
+
+```bash
+#!/bin/bash
+
+# --- Config Section ---
+
+# Base URL for GitHub repo
+BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/compress2largeVIDEOS/"
+
+# Files to download
+FILE_1="inplace_mp4_optimizer.sh"
+FILE_2="docker-compose.yml"
+FILE_3="Dockerfile"
+
+# --- Script to download files ---
+
+# Loop through all files defined with FILE_# syntax
+for i in $(compgen -A variable | grep '^FILE_'); do
+    file_url="${BASE_URL}${!i}"  # Create the full URL by getting the value of each FILE_#
+    file_name="${!i}"  # Extract the file name from the variable
+    echo "Downloading ${file_name} from ${file_url}..."
+    
+    # Download the file using curl
+    curl -O "$file_url"
+    
+    if [ $? -eq 0 ]; then
+        echo "Downloaded: $file_name"
+    else
+        echo "Failed: $file_name"
+    fi
+done
+
+echo "All files processed."
+```
+
+</details>
+
+
+* * *
+
+### Powershell Script to Download All the Files
+
+Here is a `Powershell` script to download all the required files for the In-Place MP4 Optimizer script ran in Docker.
+
+<details>
+
+<summary>Powershell Script</summary>  
+
+
+```powershell
+# --- Config Section ---
+
+# Define the base URL for your GitHub repo
+$BASE_URL = "https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/compress2largeVIDEOS/"
+
+# Add files you want to download here
+$FILE_1 = "inplace_mp4_optimizer.sh"
+$FILE_2 = "docker-compose.yml"
+$FILE_3 = "Dockerfile"
+
+# --- Script to download files ---
+
+# Loop through all files defined with FILE_# syntax
+$files = @($FILE_1, $FILE_2, $FILE_3)
+
+foreach ($file in $files) {
+    $file_url = "${BASE_URL}${file}"  # Create the full URL
+    Write-Host "Downloading $file from $file_url..."
+
+    # Define the path where the file will be saved
+    $destination_path = ".\$file"
+
+    # Download the file using Invoke-WebRequest
+    Invoke-WebRequest -Uri $file_url -OutFile $destination_path
+
+    Write-Host "Downloaded $file to $destination_path"
+}
+
+Write-Host "All files processed."
+```
+
+</details>
 
 
 * * *
