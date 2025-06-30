@@ -1,0 +1,291 @@
+name: immich
+# Docker Compose for Immich Photo Management Stack
+# -----------------------------------
+# This stack features:
+#   Immich Server - Webserver handling requests
+#   Immich Machine Learning - The sweet juice Immich pours into my computer
+#   Reddis - In-memory database, for speedy lookups
+#   Postgres - For that good olde database feel
+#   Immich Public Proxy - Unused, but available
+#   Prometheus - The official tutorial for Immich included this, so I left it
+#   Grafana - If it aint Kabana, it's Grafana
+#   Pgadmin4 - Edit the database before the kids come home
+#   Immich Kiosk - Turn your photos into a Screensaver
+#
+# This file is located at: /boot/config/plugins/compose.manager/projects/immich/docker-compose.yml
+#
+# This docker-compose file requires an env file in the same directory
+# with the following, please be sure to change these values!!
+#
+#  UPLOAD_LOCATION=/mnt/user/Immich
+#  IMPORT_LOCATION=/mnt/user/Mobile_Backups/Testing_import
+#  DB_DATA_LOCATION=/mnt/user/appdata/immich_postgresql/data
+#  PRO_DATA_LOCATION=/mnt/user/appdata/immich_prometheus/
+#  IMMICH_VERSION=release
+#  DB_PASSWORD=postgres
+#  DB_USERNAME=postgres
+#  DB_DATABASE_NAME=immich
+#  IMMICH_TELEMETRY_INCLUDE=all
+#
+#
+services:
+
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    volumes:
+      - ${UPLOAD_LOCATION}:/usr/src/app/upload
+      - ${IMPORT_LOCATION}:/usr/src/app/import
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    ports:
+      - 2283:2283
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.111
+    depends_on:
+      - redis
+      - database
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    volumes:
+      - model-cache:/cache
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.110
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:8-bookworm@sha256:42cba146593a5ea9a622002c1b7cba5da7be248650cbb64ecb9c6c33d29794b1
+    healthcheck:
+      test: redis-cli ping || exit 1
+    restart: always
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.113
+
+  database:
+    container_name: immich_postgres
+    image: docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:739cdd626151ff1f796dc95a6591b55a714f341c737e27f045019ceabf8e8c52
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: --data-checksums
+    volumes:
+      - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready --dbname="$${POSTGRES_DB}" --username="$${POSTGRES_USER}" ||
+        exit 1; Chksum="$$(psql --dbname="$${POSTGRES_DB}"
+        --username="$${POSTGRES_USER}" --tuples-only --no-align
+        --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM
+        pg_stat_database')"; echo "checksum failure count is $$Chksum"; [
+        "$$Chksum" = '0' ] || exit 1
+      interval: 5m
+    command: postgres -c shared_preload_libraries=vectors.so -c
+      'search_path="$$user", public, vectors' -c logging_collector=on -c
+      max_wal_size=2GB -c shared_buffers=512MB -c wal_compression=on
+    restart: unless-stopped
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.114
+
+  immich-public-proxy:
+    image: alangrainger/immich-public-proxy:latest
+    container_name: immich-public-proxy
+    restart: unless-stopped
+    ports:
+      - 3033:3000
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.116
+    environment:
+      - IMMICH_URL=http://172.21.8.111:2283
+
+  immich-prometheus:
+    container_name: immich_prometheus
+    ports:
+      - 9090:9090
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.117
+    image: prom/prometheus
+    restart: unless-stopped
+    volumes:
+      - ${PRO_DATA_LOCATION}/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+
+  immich-grafana:
+    container_name: immich_grafana
+    command:
+      - ./run.sh
+      - -disable-reporting
+    ports:
+      - 3000:3000
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.118
+    image: grafana/grafana
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: immich_db_admin
+    restart: unless-stopped
+    ports:
+      - 8888:80
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.119
+    environment:
+      PGADMIN_DEFAULT_EMAIL: los_emails@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: passwardos
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  immich-kiosk:
+    image: ghcr.io/damongolding/immich-kiosk:latest
+    container_name: immich-kiosk
+    networks:
+      br0.8:
+        ipv4_address: 172.21.8.120
+    environment:
+      LANG: "en_US"
+      TZ: "America/Denver"
+#
+# USER API KEYS FOR REFERENCE
+#
+#
+# user1@gmail.com
+# hS3hEYTQsheyaforksinthesinkneedwashedagFjM
+#
+# user2@gmail.com
+# LJIDFmTforksinthesinkneedwashedagaintw0wms
+#
+# user3@gmail.com
+# 1jmkihoforksinthesinkneedwashedagainPttclE
+#
+# user4@gmail.com
+# jpforksinthesinkneedwasheSNoJ0Q4QoodfoDQIg
+#
+# user5@gmail.com
+# Tu4p1OgS6roSmwfinthesinkneedwashedagainPCg
+#
+      # Required settings
+      KIOSK_IMMICH_API_KEY: "Tu4p1OgS6roSmwfinthesinkneedwashedagainPCg"
+      KIOSK_IMMICH_URL: "http://172.21.8.111:2283"
+      # External url for image links/QR codes
+      KIOSK_IMMICH_EXTERNAL_URL: ""
+      # Clock
+      KIOSK_SHOW_TIME: true
+      KIOSK_TIME_FORMAT: 12
+      KIOSK_SHOW_DATE: true
+      KIOSK_DATE_FORMAT: MM/DD/YYYY
+      KIOSK_CLOCK_SOURCE: client
+      # Kiosk behaviour
+      KIOSK_REFRESH: 25
+      KIOSK_DISABLE_SCREENSAVER: true
+      KIOSK_OPTIMIZE_IMAGES: false
+      KIOSK_USE_GPU: true
+      # Asset sources
+      KIOSK_SHOW_ARCHIVED: false
+#      KIOSK_ALBUM: "356caeeb-6979-4c12-b97c-614201dde741"   # user3 Baby Photos
+      KIOSK_ALBUM_ORDER: random
+#      KIOSK_EXCLUDED_ALBUMS: "Screenshots,a009bb8d-fea3-4591-80d5-b3a8a8247b6f,TelegramDocuments,921111b7-c71e-444a-92e1-72345f848e24"     # user1
+      KIOSK_PERSON: "d8892657-286a-480e-89a6-5c92dc425947,63b48e80-7d8a-4446-80d0-09fb2f8bd0e4,19f60f71-0c09-4cfc-f865-9205fa65a58e"     # user4
+      KIOSK_EXPERIMENTAL_ALBUM_VIDEO: true
+#      KIOSK_PERSON: "PERSON_ID,PERSON_ID,PERSON_ID"
+#      KIOSK_REQUIRE_ALL_PEOPLE: false
+#      KIOSK_EXCLUDED_PEOPLE: "PERSON_ID,PERSON_ID,PERSON_ID"
+#      KIOSK_DATE: "DATE_RANGE,DATE_RANGE,DATE_RANGE"
+#      KIOSK_TAG: "TAG_VALUE,TAG_VALUE,TAG_VALUE"
+#      KIOSK_MEMORIES: false
+#      KIOSK_BLACKLIST: "ASSET_ID,ASSET_ID,ASSET_ID"
+      # FILTER
+      KIOSK_DATE_FILTER: ""
+      # UI
+      KIOSK_DISABLE_NAVIGATION: false
+      KIOSK_DISABLE_UI: false
+      KIOSK_FRAMELESS: false
+      KIOSK_HIDE_CURSOR: true
+      KIOSK_FONT_SIZE: 100
+      KIOSK_BACKGROUND_BLUR: true
+      KIOSK_BACKGROUND_BLUR_AMOUNT: 10
+      KIOSK_THEME: fade
+      KIOSK_LAYOUT: single
+      KIOSK_SHOW_USER: true
+      # Sleep mode
+      # KIOSK_SLEEP_START: 22
+      # KIOSK_SLEEP_END: 7
+      # KIOSK_SLEEP_DIM_SCREEN: false
+      # Transistion options
+      KIOSK_TRANSITION: none
+      KIOSK_FADE_TRANSITION_DURATION: 1
+      KIOSK_CROSS_FADE_TRANSITION_DURATION: 1
+      # Image display settings
+      KIOSK_SHOW_PROGRESS: false
+      KIOSK_IMAGE_FIT: contain
+      KIOSK_IMAGE_EFFECT: smart-zoom
+      KIOSK_IMAGE_EFFECT_AMOUNT: 120
+      KIOSK_USE_ORIGINAL_IMAGE: false
+      # Image metadata
+      KIOSK_SHOW_OWNER: true
+      KIOSK_SHOW_ALBUM_NAME: true
+      KIOSK_SHOW_PERSON_NAME: true
+      KIOSK_SHOW_PERSON_AGE: false
+      KIOSK_SHOW_IMAGE_TIME: true
+      KIOSK_IMAGE_TIME_FORMAT: 12
+      KIOSK_SHOW_IMAGE_DATE: true
+      KIOSK_IMAGE_DATE_FORMAT: MM-DD-YY
+      KIOSK_SHOW_IMAGE_DESCRIPTION: true
+      KIOSK_SHOW_IMAGE_EXIF: true
+      KIOSK_SHOW_IMAGE_LOCATION: true
+      KIOSK_HIDE_COUNTRIES: "HIDDEN_COUNTRY,HIDDEN_COUNTRY"
+      KIOSK_SHOW_IMAGE_ID: false
+      KIOSK_SHOW_IMAGE_QR: false
+      KIOSK_SHOW_MORE_INFO: true
+      KIOSK_SHOW_MORE_INFO_IMAGE_LINK: true
+      KIOSK_SHOW_MORE_INFO_QR_CODE: true
+      # More info actions
+      KIOSK_LIKE_BUTTON_ACTION: favorite
+      KIOSK_HIDE_BUTTON_ACTION: tag
+      # Kiosk settings
+      KIOSK_PORT: 3000
+      KIOSK_BEHIND_PROXY: false
+      KIOSK_WATCH_CONFIG: false
+      KIOSK_FETCHED_ASSETS_SIZE: 1000
+      KIOSK_HTTP_TIMEOUT: 20
+      KIOSK_PASSWORD: ""
+      KIOSK_CACHE: true
+      KIOSK_PREFETCH: true
+      KIOSK_ASSET_WEIGHTING: true
+    ports:
+      - 3000:3000
+    restart: always
+
+volumes:
+  model-cache: null
+  prometheus-data: null
+  grafana-data: null
+  pgadmin-data: null
+
+networks:
+  br0.8:
+    external: true
+    name: br0.8
+    ipam:
+      config:
+        - subnet: 172.21.8.0/24
