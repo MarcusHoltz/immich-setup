@@ -52,7 +52,7 @@ This sounds like they're the same thing, right? NO!
 
 The first option, `Make changes outside of Immich, import your existing folders`, does not move your files. They stay where they're at and appear in Immich. 
 
-> This option is refered to as an External Library in Immich.
+> This option is referred to as an External Library in Immich.
 
 
 * * *
@@ -131,11 +131,11 @@ Make sure you're using albums properly.
 
 This is how your phone will work too. Whatever folder your photos reside it, an album will be created.
 
-So on a standard Android phone, you will have atleast one Album called `Camera`. The DCIM folder has the Camera folder, the standard folder for dumping your Camera apps photos into.
+So on a standard Android phone, you will have at-least one Album called `Camera`. The DCIM folder has the Camera folder, the standard folder for dumping your Camera apps photos into.
 
 After that things like, `Downloads`, `Telegram Images`, `Telegram Video`, `Telegram Documents`, etc it's all up to you.
 
-But make sure, if you're doing the desktop sync, that these folders make sense in a logical manner, and accompony the albums you're using on your mobile device.
+But make sure, if you're doing the desktop sync, that these folders make sense in a logical manner, and accompany the albums you're using on your mobile device.
 
 
 * * *
@@ -185,7 +185,7 @@ MY_IMMICH_API_KEY=Xf9Lm2QzT8VwJpN0bYRsCk5HaHaHad7Ue3xWjF4gZt1Ao; \
 
 #### Immich-GO (Google Takeout)
 
-Here is another example, let's import our photos from a recent Google Takeout we downladed, but oh no. 
+Here is another example, let's import our photos from a recent Google Takeout we downloaded, but oh no. 
 
 We're on a remote Windows machine - download the binary!
 
@@ -276,7 +276,7 @@ Immich has a feature to help you inspect every duplicate and decide to trash it,
 
 You run immich-stack as a command-line tool or via Docker. It connects to your Immich server using an API key and processes your photo library according to the criteria you specify.
 
-The real beauty of immich-stack is it lets you specifiy how your files have been named, then stack them accordingingly. Let me give you an example:
+The real beauty of immich-stack is it lets you specify how your files have been named, then stack them accordingingly. Let me give you an example:
 
 
 * * *
@@ -376,7 +376,7 @@ immich-go stack --server=http://172.21.8.111:2283 \
 
 ## Fourth step: Immich compress
 
-Having everyone in the family jump on your immich server as their primary means of backup (Google Photos alternative). Then you may have a server filling up very fast.
+Having everyone in the family jump on your Immich server as their primary means of backup (Google Photos alternative). Then you may have a server filling up very fast.
 
 - Grandma has several a 5GB video of her favorite train rides. 
 
@@ -431,7 +431,7 @@ You can find the `inplace_jpg_optimizer.sh` script in the [compress2largeIMAGES]
 
 ### 3. Compressing CR2 Files down to JPEG
 
-I made a script to import a family memeber's CR2 library. 
+I made a script to import a family member's CR2 library. 
 
 We're going to presume the family member's CR2 library will remain on their prem, maintained by them, but we all want to see their photos in Immich.
 
