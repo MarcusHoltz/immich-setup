@@ -48,7 +48,7 @@ This sounds like they're the same thing, right? NO!
 
 * * *
 
-### Import your folders full of photos
+### 1. Import your folders full of photos
 
 The first option, `Make changes outside of Immich, import your existing folders`, does not move your files. They stay where they're at and appear in Immich. 
 
@@ -57,7 +57,7 @@ The first option, `Make changes outside of Immich, import your existing folders`
 
 * * *
 
-### Transfer your photos to an Immich library
+### 2. Transfer your photos to an Immich library
 
 The second option, `Transfer to an Immich library`, is the one this tutorial is using. The whole point of me moving to Immich is to not have to rely on folders again, but be able to find things directly through Immich. My folders will still be there, but present as `Albums` inside of Immich. 
 
@@ -68,21 +68,27 @@ The second option, `Transfer to an Immich library`, is the one this tutorial is 
 
 ### No External Libraries in my Immich instance
 
-I am going to transfer photos to an Immich library, letting Immich handle all of the organization of my files. I am not going to organize things by folder, Weekend Trip To Dennies, Summer Vacation 2021, no. It's available now in Immich, search it.
+I am going to transfer photos to an Immich library, letting Immich handle all of the organization of my files. 
+
+I am not going to organize things by folder, Weekend Trip To Dennies, Summer Vacation 2021, no. It's available now in Immich, search it.
 
 This is the start of the entire process. How do you want to store your photos?
 
 **This is my line in the sand -- no External Libraries.**
 
-I will be importing into the system Immich uses to organize files. You can change the folder structure in the future and have Immich re-folder your files.
+I will be importing into the system Immich uses to organize files. The folder structure can be changed in the future and Immich can re-folder your files.
 
-All my meme folders, not in Immich. All of my documentation screen shots, not in Immich. All of my receipts, manuals, invoices, pdfs, not in Immich.
+- `My meme folders` - not in Immich.
 
-Yes, you could send all that to Immich, and have it available to search -- but this is a shared Immich instance for family, not a general dumping ground.
+- `All of my documentation screen shots` - not in Immich.
+
+- `All of my receipts, manuals, invoices, pdfs` - not in Immich.
+
+Yes, you could send all that to Immich, and have it available to search -- but **this** is a *shared Immich instance* for family, not a general dumping ground.
 
 If I wanted a heaping pile, then yes, I'd use external libraries.
 
-But as of now, I want each user to have the same folder structure. Any organization is done by Immich in [Albumns](https://github.com/simulot/immich-go#from-folder-sub-command).
+But as of now, I want each user to have the same folder structure. Any organization is done by Immich in [albums](https://github.com/simulot/immich-go#from-folder-sub-command).
 
 
 * * *
@@ -119,28 +125,6 @@ This will be easy when using your cell phone, just login, the mobile app asks yo
 
 * * *
 
-### All of the commands you see below
-
-All of the commands you see below have the `--dry-run` flag active on them.
-
-**There will be no changes made.**
-
-You must remove the `--dry-run` part of the command to make changes. What you see on your screen will only be a representation of the changes that can be made.
-
-
-* * *
-
-### Immich-GO
-
-But, I feel, the better option is a single binary you can slap anywhere and then start importing.
-
-It is soooooo much easier. You could be on a remote server with a remote mount, no problem. Slap that binary in there, issue the command - done. No changes to the remote machine, nothing installed.
-
-There is even a Python based GUI you could use: [Immich-Go GUI](https://github.com/shitan198u/immich-go-gui)
-
-
-* * *
-
 ### Importing Folders as Albums
 
 Make sure you're using albums properly. 
@@ -156,6 +140,28 @@ But make sure, if you're doing the desktop sync, that these folders make sense i
 
 * * *
 
+### Immich-GO
+
+Immich-GO is a single binary you can slap anywhere and then start importing.
+
+It is soooooo easy. You could be on a remote server with a remote mount, no problem. Slap that binary in there, issue the command - done. No changes to the remote machine, nothing installed.
+
+There is even a Python based GUI you could use: [Immich-Go GUI](https://github.com/shitan198u/immich-go-gui)
+
+
+* * *
+
+### All of the commands are on --dry-run
+
+All of the commands you see below have the `--dry-run` flag active on them.
+
+**There will be no changes made.**
+
+You must remove the `--dry-run` part of the command to make changes. What you see on your screen will only be a representation of the changes that can be made.
+
+
+* * *
+
 #### Immich-GO (expects subfolders)
 
 This will work in the current directory, assuming you have your folders there and the immich-go binary. But it will also "join folders" - what this means is if you have a bunch of subdirectories `/some/stuff/here/for/my/specific/purpose` - there are no sub-albumns in Immich. You need to flatten that structure. If you flatten it, what do you want it to look like? `some-stuff-here-for-my-specific-purpose`. And pictures in the `/some/stuff/here` directory will be in the album, `some-stuff-here`. The album-path-joiner flag at then end takes `/` and replaces them with `-` ... this is the same as `sed 's/\//-/g'`
@@ -163,7 +169,14 @@ This will work in the current directory, assuming you have your folders there an
 
 ```bash
 
-MY_IMMICH_API_KEY=Xf9Lm2QzT8VwJpN0bYRsCk5HaHaHad7Ue3xWjF4gZt1Ao ./immich-go upload from-folder --dry-run --pause-immich-jobs=FALSE --api-key $MY_IMMICH_API_KEY --server http://172.21.8.111:2283 --recursive . --folder-as-album FOLDER --album-path-joiner "-"
+MY_IMMICH_API_KEY=Xf9Lm2QzT8VwJpN0bYRsCk5HaHaHad7Ue3xWjF4gZt1Ao; \
+./immich-go upload from-folder --dry-run \
+  --pause-immich-jobs=FALSE \
+  --api-key $MY_IMMICH_API_KEY \
+  --server http://172.21.8.111:2283 \
+  --recursive . \
+  --folder-as-album FOLDER \
+  --album-path-joiner "-"
 
 ```
 
@@ -202,7 +215,14 @@ Here is an example to import only the files in the current directory, and to giv
 
 ```bash
 
-MY_IMMICH_API_KEY=Tf2m9WzH8bpYndik7RVeAZr4DH3LwtMluLggk6TXe;IMMICH_ALBUM_NAME=birthday2024; docker run -it -v "$(pwd)":/import:ro -e IMMICH_INSTANCE_URL=http://172.21.8.111:2283 -e IMMICH_API_KEY=$MY_IMMICH_API_KEY ghcr.io/immich-app/immich-cli:latest upload --dry-run --album-name $IMMICH_ALBUM_NAME -c 5 --recursive .
+MY_IMMICH_API_KEY=Tf2m9WzH8bpYndik7RVeAZr4DH3LwtMluLggk6TXe; \
+IMMICH_ALBUM_NAME=birthday2024; \
+docker run -it -v "$(pwd)":/import:ro \
+  -e IMMICH_INSTANCE_URL=http://172.21.8.111:2283 \
+  -e IMMICH_API_KEY=$MY_IMMICH_API_KEY \
+  ghcr.io/immich-app/immich-cli:latest \
+  upload --dry-run --album-name $IMMICH_ALBUM_NAME \
+  -c 5 --recursive .
 
 ```
 
@@ -242,7 +262,6 @@ docker run --rm -it \
 [Immich-stack](https://github.com/majorfi/immich-stack) is designed to [automatically group similar photos](https://majorfi.github.io/immich-stack/getting-started/quick-start/) into [stacks](https://immich.app/docs/api/create-stack/) within the Immich photo management system. Its primary purpose is to help users organize large photo libraries by stacking related images—such as burst shots, [similar filenames](https://majorfi.github.io/immich-stack/api-reference/environment-variables/?h=criteria#custom-criteria_1), or images taken in quick succession—into logical groups for easier browsing and management
 
 
-* * *
 
 ### Duplicates with Immich stack
 
@@ -278,8 +297,6 @@ immich-stack \
 ```
 
 
-* * *
-
 #### Immich-Stack Command Explained
 
 Sorry, let me explain this a little. Their [wiki](https://majorfi.github.io/immich-stack/) isnt too easy to go by.
@@ -307,7 +324,6 @@ You're just letting it go find duplicates or similar photos and stack them, you 
 Stack photos using immich-go is done with the `stack` command, which connects to your Immich server and groups related photos together based on the options for stacking below:
 
 
-* * *
 
 #### Options for Immich-GO Stacking
 
@@ -332,7 +348,11 @@ Stack photos using immich-go is done with the `stack` command, which connects to
 
 ```bash
 
-immich-go stack --server=http://172.21.8.111:2283 --api-key=your-api-key --dry-run --manage-raw-jpeg=StackCoverRaw
+MY_IMMICH_API_KEY=Ab3Tg5kPzQ9CwL8WbYdRsH3VvDf7GxF1Zh6JmK9A3t4L; \
+immich-go stack --server=http://172.21.8.111:2283 \
+  --api-key=$MY_IMMICH_API_KEY \
+  --dry-run \
+  --manage-raw-jpeg=StackCoverRaw
 
 ```
 
@@ -342,7 +362,13 @@ immich-go stack --server=http://172.21.8.111:2283 --api-key=your-api-key --dry-r
 ##### Immich-GO Stacking Example: Stack burst photos**
 
 ```bash
-immich-go stack --server=http://172.21.8.111:2283 --api-key=your-api-key --dry-run --manage-burst=Stack
+
+MY_IMMICH_API_KEY=Jq5KnX2Bf7WsRp9VtHgYzDdQm8ZtUv0Cv4JsLwP3a1BoK; \
+immich-go stack --server=http://172.21.8.111:2283 \
+  --api-key=$MY_IMMICH_API_KEY \
+  --dry-run \
+  --manage-burst=Stack
+
 ```
 
 
@@ -365,7 +391,7 @@ Original files will always be backed up and stored off site. But if you really n
 
 * * *
 
-### Compressing Video Files Over a Specific Size
+### 1. Compressing Video Files Over a Specific Size
 
 Grandma and her train rides... If you have several people uploading large video files that are tapping your storage space as outliers, compress them.
 
@@ -384,7 +410,7 @@ You can find the `inplace_mp4_optimizer.sh` script in the [compress2largeVIDEOS]
 
 * * *
 
-### Compressing Image Files Over a Specific Size
+### 2. Compressing Image Files Over a Specific Size
 
 Uncle and his darkroom skills... Has certain files that are way larger than the rest of the media that sits on the server, compress them.
 
@@ -403,7 +429,7 @@ You can find the `inplace_jpg_optimizer.sh` script in the [compress2largeIMAGES]
 
 * * *
 
-### Compressing CR2 Files down to JPEG
+### 3. Compressing CR2 Files down to JPEG
 
 I made a script to import a family memeber's CR2 library. 
 
