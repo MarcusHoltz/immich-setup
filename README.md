@@ -8,11 +8,11 @@ Here are all of the things I had to do to get Immich at a point where users, and
 
 Hello. Welcome. 
 
-I presume you're here because you want out of some photos/videos/memories cloud-based proprietary system.
+I presume you're here because you want out of a proprietary cloud-based photos/videos/memories system.
 
-[Immich](https://www.reddit.com/r/immich/) is a good Google Photos or iCloud Photos alternative. 
+[Immich](https://www.reddit.com/r/immich/) is a good Google Photos or iCloud Photos alternative, and still allows sharing between multiple users. It may just be easy enough for your parents.
 
-It is not just a good iCloud/Google Photos replacement, in some aspects, it does much more.
+It is not just a good iCloud/Google Photos replacement, in many aspects, it does much more.
 
 
 * * *
@@ -39,9 +39,9 @@ Let's go!
 
 How Immich works, you need to pick one of these two:
 
-- [Make changes outside of Immich, import your existing folders](https://immich.app/docs/guides/external-library/)
+1. [Make changes outside of Immich, import your existing folders](https://immich.app/docs/guides/external-library/)
 
-- [Transfer your current folders full of photos to an Immich library](https://immich.app/docs/features/command-line-interface/)
+2. [Transfer your current folders full of photos to an Immich library](https://immich.app/docs/features/command-line-interface/)
 
 This sounds like they're the same thing, right? NO!
 
@@ -66,15 +66,15 @@ The second option, `Transfer to an Immich library`, is the one this tutorial is 
 
 * * *
 
-### No External Libraries in my Immich instance
+### Why transfer files to an Immich library?
 
 I am going to transfer photos to an Immich library, letting Immich handle all of the organization of my files. 
 
-I am not going to organize things by folder, Weekend Trip To Dennies, Summer Vacation 2021, no. It's available now in Immich, search it.
+We won't ever need to create new folders to sort our media; all of it is available in Immich, just search it.
 
-This is the start of the entire process. How do you want to store your photos?
+This is the start of the entire process. How will you store your photos?
 
-**This is my line in the sand -- no External Libraries.**
+**Why manage External Libraries for family and friends, when you could transfer those files from shared folders to a centralized location?**
 
 I will be importing into the system Immich uses to organize files. The folder structure can be changed in the future and Immich can re-folder your files.
 
@@ -84,11 +84,11 @@ I will be importing into the system Immich uses to organize files. The folder st
 
 - `All of my receipts, manuals, invoices, pdfs` - not in Immich.
 
+- `Smokie's Birthday Photos` - in Immich.
+
 Yes, you could send all that to Immich, and have it available to search -- but **this** is a *shared Immich instance* for family, not a general dumping ground.
 
-If I wanted a heaping pile, then yes, I'd use external libraries.
-
-But as of now, I want each user to have the same folder structure. Any organization is done by Immich in [albums](https://github.com/simulot/immich-go#from-folder-sub-command).
+Each user will have the same folder structure. Any organization is done by Immich in [albums](https://github.com/simulot/immich-go#from-folder-sub-command).
 
 
 * * *
@@ -97,7 +97,7 @@ But as of now, I want each user to have the same folder structure. Any organizat
 
 I have most of my long term and speedy storage on UnRAID. 
 
-So, to me, it made sense to setup Immich on the UnRAID server, no point of having the service up if the files are unavailable.
+Immich will reside on the UnRAID server, no point of having the service up if the files are unavailable.
 
 [Immich](https://immich.app/docs/overview/welcome) has a very good [Unraid starter template](https://immich.app/docs/install/unraid) for us to use.
 
@@ -105,7 +105,7 @@ This write-up assumes you've already had a go at that. If not, give the [Unraid:
 
 I will be using that as a base for the files in this tutorial. You can find the files we will be using, the ones I use on my UnRAID server, in my [Immich Setup Repo](https://github.com/MarcusHoltz/immich-setup/tree/main/unraid-immich-compose).
 
-To setup, if you're not using UnRAID, the [docker-compose.yml](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/docker-compose.yml) and [env](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/env) files will work just fine.
+To setup - if you're not using UnRAID - the [docker-compose.yml](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/docker-compose.yml) and [env](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/env) files will work just fine.
 
 
 * * *
@@ -120,7 +120,7 @@ When importing your already saved folders into Immich you will need an API alrea
 
 This will be easy when using your cell phone, just login, the mobile app asks you what folders and BAM they're on the server.
 
-> But what are we going to do with our old photo archive™ and Google Takeout photos?
+> But what are we going to do with our old photo archive and Google Takeout photos?
 
 
 * * *
