@@ -1,6 +1,6 @@
 # Immich Setup Scripts
 
-Here are all of the things I had to do to get Immich in a state where users, and myself, could enjoy using it.
+Here are all of the things I had to do to get Immich at a point where users, and myself, could start to enjoy using it.
 
 * * *
 
