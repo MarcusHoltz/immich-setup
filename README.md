@@ -8,19 +8,18 @@ Here are all of the things I had to do to get Immich at a point where users, and
 
 Hello. Welcome. 
 
-I presume you're here because you want out of a cloud-based hosting system.
+I presume you're here because you want out of some photos/videos/memories cloud-based proprietary system.
 
-[Immich](https://www.reddit.com/r/immich/) is a good Google Photos alternative. It is not just a good Google Photos replacement, in some aspects, it does much more.
+[Immich](https://www.reddit.com/r/immich/) is a good Google Photos or iCloud Photos alternative. 
+
+It is not just a good iCloud/Google Photos replacement, in some aspects, it does much more.
 
 
 * * *
 
 ## Getting Immich Up and Running
 
-This tutorial is a walkthrough of my implementation of Immich. All of the little things I had to do to get this service in a state where users, and myself, enjoy using it.
-
 What all does this tutorial cover?
-
 
 - [Install](#first-step-install)
 
@@ -60,7 +59,7 @@ The first option, `Make changes outside of Immich, import your existing folders`
 
 ### Transfer your photos to an Immich library
 
-The second option is the one this tutorial is using. The whole point of me moving to Immich is to not have to rely on folders again, but be able to find things directly through Immich. My folders will still be there, but present as `Albums` inside of Immich. 
+The second option, `Transfer to an Immich library`, is the one this tutorial is using. The whole point of me moving to Immich is to not have to rely on folders again, but be able to find things directly through Immich. My folders will still be there, but present as `Albums` inside of Immich. 
 
 > You will need to import your photos to Immich. This is an extra process as you're sending data into Immich, not just pointing to an External Library.
 
