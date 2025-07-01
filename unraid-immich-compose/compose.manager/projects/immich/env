@@ -4,7 +4,7 @@
 UPLOAD_LOCATION=/mnt/user/Immich
 
 # Dont use Immich External Libraries unless you have to, it will scatter your files.
-IMPORT_LOCATION=/mnt/user/MobileBackups/Testing_import
+IMPORT_LOCATION=/mnt/user/Mobile_Backups/Testing_import
 
 # The location where your database files are stored. Network shares are not supported for the database
 DB_DATA_LOCATION=/mnt/user/appdata/immich_postgresql/data
