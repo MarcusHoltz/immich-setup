@@ -32,10 +32,66 @@ You can find out more about [UnRAID's Unofficial Docker Compose Manager Plugin](
 
 - Once it's installed, you can find it under `Plugins`.
 
-- Start a new stack and name it `immich`.
+- Add New Compose Stack, and name it `immich`.
 
 > This will create a new folder under:
 `/boot/config/plugins/compose.manager/projects/immich/`
+
+
+* * *
+
+## UnRAID Immich Setup Downloader: Copy the Github Files
+
+If you haven’t copied the [Immich Setup: Install Immich on UnRAID Compose Github](https://github.com/MarcusHoltz/immich-setup/tree/main/unraid-immich-compose) repo yet, you'll need to get a few files:
+
+- `docker-compose.yml` - in the `compose.manager` folder. **REQUIRED** - The main configuration file that defines all services and their relationships. Deploy this file to launch your complete Immich infrastructure.
+
+- `env` - in the `compose.manager` folder. **REQUIRED** - Contains your required environment variables. Configure your storage locations and database credentials here.
+
+- `docker-compose.override.yml` - in the `compose.manager` folder. This is an optional file for making custom modifications without editing the main compose file, for icons and web addresses.
+
+- `Immich-docker-compose` - in the `user.scripts` folder. Unraid script for automated start and management of the Immich stack.
+
+
+* * *
+
+### Bash/ZSH Script to Download UnRAID Immich Setup
+
+If you have not dowloaded anything yet, here is a `Bash` script to download all the required files for an UnRAID Immich Setup:
+
+
+<details>
+
+<summary>Bash/ZSH UnRAID Immich Setup Downloader</summary>  
+
+
+```bash
+
+BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/unraid-immich-compose/" && for file in "user.scripts/scripts/Immich-docker-compose" "compose.manager/projects/immich/docker-compose.yml" "compose.manager/projects/immich/env" "compose.manager/projects/immich/docker-compose.override.yml"; do curl -O "$BASE_URL$file"; done
+
+```
+
+</details>
+
+
+* * *
+
+### Powershell Script to Download UnRAID Immich Setup
+
+Here is a `Powershell` script to download all the required files for an UnRAID Immich Setup:
+
+<details>
+
+<summary>Powershell UnRAID Immich Setup Downloader</summary>  
+
+
+```powershell
+
+$BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/unraid-immich-compose/"; @("user.scripts/scripts/Immich-docker-compose","compose.manager/projects/immich/docker-compose.yml","compose.manager/projects/immich/env","compose.manager/projects/immich/docker-compose.override.yml") | ForEach-Object { Invoke-WebRequest -Uri "$BASE_URL$_" -OutFile ".\$(Split-Path $_ -Leaf)" }
+
+```
+
+</details>
 
 
 * * *
@@ -62,62 +118,50 @@ This is what lies inside the docker compose stack I decided to use:
 
 - `Immich Kiosk` - Turn your photos into a Screensaver
 
-
-### Compose File
-
-The docker-compose.yml file is below:
-
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
+Now that you know what's included in the stack, let's get this Docker Compose file ready to go!
 
 
 
+### Compose File on UnRAID
+
+A `docker-compose.yml` file contains all of the programs in the stack.
+
+If you are using [UnRAID's Docker Compose Manager Community Application](https://forums.unraid.net/topic/114415-plugin-docker-compose-manager):
+
+- Make sure the stack_name is `immich`
+
+- The `docker-compose.yml` file should be located at: `/boot/config/plugins/compose.manager/projects/immich/docker-compose.yml`
+
+Additionally, you require one more file... 
 
 
 
 ### Env File
 
-This stack also relies on an Environment Varriable to help set some of the configuration information.
+This stack relies on environment variables. An environment variable file is typically named `.env` and must be placed in the same directory as the compose file.
 
-My Env File is as follows:
+This stack also relies on Environment Varriables to help set some of the configuration information, but the environment variable file is named `env`, without the `period`. This is how the plugin is written.
 
+- Make sure the stack_name is `immich`
 
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
+- Your `env` file needs to be in the same directory as the `docker-compose.yml` file.
 
-
-
+- The `env` file should be located at: `/boot/config/plugins/compose.manager/projects/immich/env`
 
 
 * * *
 
 ### Docker-Compose Additional UnRAID Overrides
 
+UnRAID special labels with Docker that help the web interface display addional information. These labels define elements like the WebUI URL, container icons, and descriptions that appear in the Unraid dashboard. By including these labels in a `docker-compose.override.yml` file, you can make Immich services integrate seamlessly with Unraid's management interface, accessible through the GUI.
 
-UnRAID uses docker, but also is able to use special labels to allow the interface to better present the user with these services.
+If you are using [UnRAID's Docker Compose Manager Community Application](https://forums.unraid.net/topic/114415-plugin-docker-compose-manager) this is a nice feature to have.
 
+- Make sure the stack_name is `immich`
 
+- Your `docker-compose.override.yml` file needs to be in the same directory as the `docker-compose.yml` file.
 
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-
-
-
+- The `docker-compose.override.yml` file should be located at: `/boot/config/plugins/compose.manager/projects/immich/docker-compose.override.yml`
 
 
 * * *
@@ -133,19 +177,18 @@ Immich will fail, as the network has not fully come up yet. YMMV.
 
 #### Install Userscripts on UnRAID
 
-To fix this we're using the [User Scripts](https://github.com/Squidly271/user.scripts/blob/master/plugins/user.scripts.plg) plugin.
+To fix the Immich stack startup we're using the [User Scripts](https://github.com/Squidly271/user.scripts/blob/master/plugins/user.scripts.plg) plugin.
 
 You can find out more about [The Community Application: User Scripts](https://forums.unraid.net/topic/48286-plugin-ca-user-scripts/).
 
 Make sure it is installed before continuing.
 
 
-
 * * *
 
 ### Using User Scripts for Immich Delay
 
-I have this script in my User Scripts and it runs at the start of the array.
+I have this in my User Scripts and it runs at the start of the array.
 
 My docker-compose stack name is `immich`. The rest should be copy and paste.
 
@@ -153,15 +196,25 @@ This script waits 100 seconds and then updates & restarts the docker-compose sta
 
 It then proceeds to do the same to NetBird. 
 
+If you are using [UnRAID's User Scripts Community Application](https://forums.unraid.net/topic/48286-plugin-ca-user-scripts/) this is a nice feature to have.
 
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
-GITHUB
+- Make sure the directory you're in is `/boot/config/plugins/user.scripts/scripts/`
+
+- Your `Immich-docker-compose` file needs to be in the `/boot/config/plugins/user.scripts/scripts/` directory.
+
+- Alternativly, you can use the GUI: `Settings` > `User Scripts` > `Add New Script` > `Immich-docker-compose` > `click on cog next to name` > `Edit Script` > `Paste`
+
+   ```bash
+   #!/bin/bash
+   cd /boot/config/plugins/compose.manager/projects/immich
+   sleep 100
+   docker compose down
+   docker compose pull
+   docker compose up -d
+   sleep 60
+   docker container restart NetBird-Client
+   ```
+
 
 
 * * *
