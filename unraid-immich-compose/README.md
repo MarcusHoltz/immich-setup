@@ -59,19 +59,11 @@ If you haven’t copied the [Immich Setup: Install Immich on UnRAID Compose Gith
 
 If you have not dowloaded anything yet, here is a `Bash` script to download all the required files for an UnRAID Immich Setup:
 
-
-<details>
-
-<summary>Bash/ZSH UnRAID Immich Setup Downloader</summary>  
-
-
 ```bash
 
 BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/unraid-immich-compose/" && for file in "user.scripts/scripts/Immich-docker-compose" "compose.manager/projects/immich/docker-compose.yml" "compose.manager/projects/immich/env" "compose.manager/projects/immich/docker-compose.override.yml"; do curl -O "$BASE_URL$file"; done
 
 ```
-
-</details>
 
 
 * * *
@@ -80,18 +72,11 @@ BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/unraid
 
 Here is a `Powershell` script to download all the required files for an UnRAID Immich Setup:
 
-<details>
-
-<summary>Powershell UnRAID Immich Setup Downloader</summary>  
-
-
 ```powershell
 
 $BASE_URL="https://raw.githubusercontent.com/MarcusHoltz/immich-setup/main/unraid-immich-compose/"; @("user.scripts/scripts/Immich-docker-compose","compose.manager/projects/immich/docker-compose.yml","compose.manager/projects/immich/env","compose.manager/projects/immich/docker-compose.override.yml") | ForEach-Object { Invoke-WebRequest -Uri "$BASE_URL$_" -OutFile ".\$(Split-Path $_ -Leaf)" }
 
 ```
-
-</details>
 
 
 * * *
