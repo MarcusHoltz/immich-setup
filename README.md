@@ -78,11 +78,11 @@ This is the start of the entire process. How will you store your photos?
 
 I will be importing into the system Immich uses to organize files. The folder structure can be changed in the future and Immich can re-folder your files.
 
-- `My meme folders` - not in Immich.
+- `My meme folders` - not in Immich. (use [Meme-search](https://github.com/neonwatty/meme-search))
 
-- `All of my documentation screen shots` - not in Immich.
+- `All of my documentation screen shots` - not in Immich. (use [Holtzweb Blog](https://blog.holtzweb.com/))
 
-- `All of my receipts, manuals, invoices, pdfs` - not in Immich.
+- `All of my receipts, manuals, invoices, pdfs` - not in Immich. (use [Papra](https://github.com/papra-hq/papra) or [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx))
 
 - `Smokie's Birthday Photos` - in Immich.
 
