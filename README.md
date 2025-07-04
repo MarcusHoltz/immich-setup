@@ -102,13 +102,20 @@ I have most of my long term and speedy storage on UnRAID.
 
 Immich will reside on the UnRAID server, no point of having the service up if the files are unavailable.
 
-[Immich](https://immich.app/docs/overview/welcome) has a very good [Unraid starter template](https://immich.app/docs/install/unraid) for us to use.
+Immich has a very good [Unraid starter template](https://immich.app/docs/install/unraid) for us to use. This write-up assumes you've already had a go at that. 
 
-This write-up assumes you've already had a go at that. If not, give the [Unraid: Community Applications Template - Docker-Compose Method](https://immich.app/docs/install/unraid) official documentation a read.
+If not, give the [Immich on Unraid: Docker-Compose Method](https://immich.app/docs/install/unraid) official documentation from Immich a read.
 
-I will be using that as a base for the files in this tutorial. You can find the files we will be using, the ones I use on my UnRAID server, in my [Immich Setup Repo](https://github.com/MarcusHoltz/immich-setup/tree/main/unraid-immich-compose).
+I will be using that as a base for the files in this tutorial. 
 
-To setup - if you're not using UnRAID - the [docker-compose.yml](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/docker-compose.yml) and [env](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/env) files will work just fine.
+
+### Copy my files, make a few edits
+
+You can find the files we will be using, the same I use on my UnRAID server, in my:
+
+- [UnRAID Immich Setup Repo](https://github.com/MarcusHoltz/immich-setup/tree/main/unraid-immich-compose).
+
+> To setup - if you're not using UnRAID - the [docker-compose.yml](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/docker-compose.yml) and [env](https://github.com/MarcusHoltz/immich-setup/blob/main/unraid-immich-compose/compose.manager/projects/immich/env) files will work just fine.
 
 
 * * *
