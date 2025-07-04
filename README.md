@@ -385,7 +385,7 @@ Having everyone in the family jump on your Immich server as their primary means 
 
 - Uncle uses 50MB jpegs for edits of his best photos.
 
-- Cousin store photos with his RAW/CR2 files present (psst - tell them there's a [Lightroom Immich plugin](https://blog.fokuspunk.de/lrc-immich-plugin/)).
+- Cousin stores all of his photos as RAW/CR2 files (psst - tell them there's a [Lightroom Immich plugin](https://blog.fokuspunk.de/lrc-immich-plugin/)).
 
 Yeah. **Lossy compression may be deemed acceptable.** 
 
