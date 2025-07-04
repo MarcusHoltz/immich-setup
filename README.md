@@ -4,6 +4,13 @@ Here are all of the things I had to do to get Immich at a point where users, and
 
 * * *
 
+For the blog post that goes along with this guide, visit: [https://blog.holtzweb.com/posts/complete-immich-docker-setup-guide-configuration](https://blog.holtzweb.com/posts/complete-immich-docker-setup-guide-configuration)
+
+* * *
+
+
+* * *
+
 ## Hi, I'm new to Immich
 
 Hello. Welcome. 
